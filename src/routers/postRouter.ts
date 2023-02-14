@@ -1,5 +1,4 @@
-import express, { Request, Response } from "express";
-import knex from "knex";
+import express from "express";
 import { PostBusiness } from "../business/PostBusiness";
 import { PostController } from "../controller/PostController";
 import { PostDatabase } from "../database/PostDatabase";
