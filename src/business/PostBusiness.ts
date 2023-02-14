@@ -1,4 +1,3 @@
-import knex from "knex"
 import { PostDatabase } from "../database/PostDatabase"
 import { Post } from "../models/Post"
 
