@@ -12,11 +12,11 @@ export class UserDatabase extends BaseDatabase {
         return userDB
     }
 
-    public getUsersById = async (q: string) => {
-        const userDB = await BaseDatabase
+    public getUsersById = async (id: string): Promise<UserDB | undefined>  => {
+        const [userDB] = await BaseDatabase
             .connection(UserDatabase.TABLE_USERS)
             .select()
-            .where("id", "LIKE", `%${q}%`)
+            .where({id})
 
         return userDB
     }

@@ -43,3 +43,10 @@ export interface UserModel {
     role: USER_ROLES,
     createdAt: string
 }
+
+export interface PostEditDB{
+    content?:string,
+    likes?:number,
+    dislikes?:number,
+    updated_at?:string
+}

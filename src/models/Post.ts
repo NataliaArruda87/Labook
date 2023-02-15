@@ -52,7 +52,7 @@ export class Post {
         return this.content
     }
 
-    public setContent(value: string) {
+    public setContent(value: string | undefined) {
         this.content = value
     }
 
@@ -101,7 +101,5 @@ export class Post {
     }) {
         this.creator = value;
     }
-
-
 
 }
