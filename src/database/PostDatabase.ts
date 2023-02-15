@@ -1,4 +1,4 @@
-import { PostDB } from "../types";
+import { PostDB, PostEditDB } from "../types";
 import { BaseDatabase } from "./BaseDatabase";
 import { UserDatabase } from "./UserDatabase";
 
@@ -13,7 +13,7 @@ export class PostDatabase extends BaseDatabase {
         return postsDB
     }
 
-    public getPostsWithUsers = async (q: string | undefined) => {
+    public getPostsWithUsers = async (q: string | undefined | unknown) => {
         
         let postsDB: PostDB[]
         if (q) {
@@ -32,12 +32,34 @@ export class PostDatabase extends BaseDatabase {
         }
     }
 
-    public getPostsById = async (q: string) => {
+    public getPostsById = async (q: string | unknown) => {
         const postsDB = await BaseDatabase
             .connection(PostDatabase.TABLE_POSTS)
             .select()
-            .where("id", "LIKE", `%${q}%`)
+            .where({q})
 
         return postsDB
+    }
+
+    public getPostsByIdToEdit = async (id:string):Promise<PostDB| undefined> => {
+        const [postsDB] = await BaseDatabase
+            .connection(PostDatabase.TABLE_POSTS)
+            .where({id})
+
+        return postsDB
+    }
+
+
+    public async insertPost(newPostDB: PostDB) {
+        await BaseDatabase
+            .connection(PostDatabase.TABLE_POSTS)
+            .insert(newPostDB)
+    }
+
+    public editPostbyId =async (id:string, toEdit:PostEditDB):Promise<void>=> {
+        await BaseDatabase
+        .connection(PostDatabase.TABLE_POSTS)
+        .update(toEdit)
+        .where({id})
     }
 }
