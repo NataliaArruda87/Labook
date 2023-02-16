@@ -36,23 +36,8 @@ export interface EditPostInput {
     content: unknown
 }
 
-/*export class PostsDTO {
-
-    public CreatePostInputDTO = (
-        content:unknown,
-        token:unknown
-        ):CreatePostInput => { 
-
-        if(typeof content!=='string')
-        {throw new BadRequestError('Content deve ser uma string')}
-        
-        if(typeof token !== 'string')
-        {throw new BadRequestError('token invalida')}
-        
-        const dto : CreatePostInput = {
-            content,
-            token
-        }
-        return dto
-    }
-}*/
+export interface LikeDislikePostInput {
+    idToLikeDislike: string,
+    token: string | undefined,
+    like: unknown
+}

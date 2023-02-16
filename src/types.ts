@@ -21,6 +21,16 @@ export interface PostModel {
     }
 }
 
+export interface LikeDislikeDB{
+    user_id: string,
+    post_id: string,
+    like: number
+}
+
+export interface PoststWithCreatorDB extends PostDB {
+    creator_name: string
+}
+
 export enum USER_ROLES {
     NORMAL = "NORMAL",
     ADMIN = "ADMIN"
@@ -44,9 +54,4 @@ export interface UserModel {
     createdAt: string
 }
 
-export interface PostEditDB{
-    content?:string,
-    likes?:number,
-    dislikes?:number,
-    updated_at?:string
-}
+
