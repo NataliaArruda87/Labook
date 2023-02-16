@@ -26,3 +26,4 @@ export interface LoginOutput {
     message: string,
     token: string
 }
+

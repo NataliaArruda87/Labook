@@ -1,11 +1,9 @@
 import { Request, Response } from "express"
-import knex from 'knex'
 import { PostBusiness } from "../business/PostBusiness"
-import { CreateEditInput, CreatePostInput, GetPostInput, PostsDTO } from "../dtos/postDTO"
+import {  CreatePostInput, DeletePostInput, EditPostInput, GetPostInput } from "../dtos/postDTO"
 
 export class PostController {
     constructor(
-        private postDto: PostsDTO,
         private postBusiness: PostBusiness
     ){}
 
@@ -65,15 +63,43 @@ export class PostController {
 
     public editPost = async (req: Request, res: Response) => {
         try {
-            const input = {
-                data:this.postDto.CreatePostInputDTO(req.body.content, req.headers.authorization),
-                id: req.params.id
+            const input: EditPostInput = {
+               idToEdit: req.params.id,
+               content: req.body.content,
+               token: req.headers.authorization
             }
 
             const output = await this.postBusiness.editPost(input)
 
             res.status(201).send(output)
     
+        } catch (error) {
+            console.log(error)
+        
+            if (req.statusCode === 200) {
+                res.status(500)
+            }
+        
+            if (error instanceof Error) {
+                res.send(error.message)
+            } else {
+                res.send("Erro inesperado")
+            }          
+        }
+    }
+
+
+    public deletePost = async (req: Request, res: Response) => {
+        try {
+            const input:  DeletePostInput = {
+                idToDelete: req.params.id,
+                token: req.headers.authorization
+            }
+
+            await this.postBusiness.deletePost(input)
+            
+            res.status(200). end()
+
         } catch (error) {
             console.log(error)
         

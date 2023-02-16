@@ -41,14 +41,15 @@ export class PostDatabase extends BaseDatabase {
         return postsDB
     }
 
-    public getPostsByIdToEdit = async (id:string):Promise<PostDB| undefined> => {
-        const [postsDB] = await BaseDatabase
-            .connection(PostDatabase.TABLE_POSTS)
-            .where({id})
 
-        return postsDB
+    public findById = async (id: string): Promise<PostDB | undefined> => {
+        const result: PostDB[] = await BaseDatabase
+        .connection(PostDatabase.TABLE_POSTS)
+        .select()
+        .where({ id })
+
+        return result[0]
     }
-
 
     public async insertPost(newPostDB: PostDB) {
         await BaseDatabase
@@ -56,10 +57,17 @@ export class PostDatabase extends BaseDatabase {
             .insert(newPostDB)
     }
 
-    public editPostbyId =async (id:string, toEdit:PostEditDB):Promise<void>=> {
+    public updatePost = async (id: string, postDB: PostDB):Promise<void> => {
+        await BaseDatabase
+            .connection(PostDatabase.TABLE_POSTS)
+            .update(postDB)
+            .where({ id })
+    }
+
+    public deletePost = async (id: string): Promise<void> => {
         await BaseDatabase
         .connection(PostDatabase.TABLE_POSTS)
-        .update(toEdit)
-        .where({id})
+        .delete()
+        .where({ id })
     }
 }

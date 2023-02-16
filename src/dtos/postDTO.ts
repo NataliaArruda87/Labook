@@ -25,7 +25,18 @@ export interface CreatePostOutput {
     post: PostModel
 }
 
-export class PostsDTO {
+export interface DeletePostInput {
+    idToDelete: string,
+    token: string | undefined
+}
+
+export interface EditPostInput {
+    idToEdit: string,
+    token: string | undefined,
+    content: unknown
+}
+
+/*export class PostsDTO {
 
     public CreatePostInputDTO = (
         content:unknown,
@@ -44,5 +55,4 @@ export class PostsDTO {
         }
         return dto
     }
-
-}
+}*/

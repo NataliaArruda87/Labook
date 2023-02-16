@@ -19,10 +19,11 @@ CREATE TABLE posts (
     FOREIGN KEY (creator_id) REFERENCES users (id)
 );
 
-INSERT INTO users (id, conte, email, password, role)
+INSERT INTO users (id, name, email, password, role)
 VALUES
-	("u001", "Natalia", "nataliao@email.com", "123456", "normal"),
-	("u002", "Stela", "stela@email.com", "789789", "normal");
+	("u001", "Natalia", "nataliao@email.com", "123456", "NORMAL"),
+	("u002", "Stela", "stela@email.com", "789789", "NORMAL"),
+    ("u003", "Nice", "nice@email.com", "010101", "ADMIN");
 
 INSERT INTO posts (id, creator_id, content)
 VALUES
@@ -34,3 +35,5 @@ SELECT * FROM users;
 SELECT * FROM posts;
 
 DROP TABLE posts;
+
+DROP TABLE users;
