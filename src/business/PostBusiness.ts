@@ -1,18 +1,15 @@
-import { createBrotliCompress } from "zlib"
 import { PostDatabase } from "../database/PostDatabase"
 import { UserDatabase } from "../database/UserDatabase"
-import { CreateEditInput, CreatePostInput, CreatePostOutput, GetPostInput, GetPostsOutput, PostsDTO } from "../dtos/postDTO"
+import { CreatePostInput, CreatePostOutput, DeletePostInput, EditPostInput, GetPostInput, GetPostsOutput } from "../dtos/postDTO"
 import { BadRequestError } from "../errors/BadRequestError"
 import { NotFoundError } from "../errors/NotFoundError"
 import { Post } from "../models/Post"
-import { User } from "../models/User"
 import { IdGenerator } from "../services/IdGenerator"
 import { TokenManager } from "../services/TokenManager"
-import { PostEditDB, USER_ROLES } from "../types"
+import { PostDB, USER_ROLES } from "../types"
 
 export class PostBusiness {
     constructor(
-        private postDto: PostsDTO,
         private postDatabase: PostDatabase,
         private userDataBase: UserDatabase,
         private idGenerator: IdGenerator,
@@ -90,7 +87,7 @@ export class PostBusiness {
         const payload = this.tokenManager.getPayload(token)
 
         if (payload === null) {
-            throw new BadRequestError("token não é valido")
+            throw new BadRequestError("token invalido")
         }
 
         const id = this.idGenerator.generate()
@@ -119,23 +116,44 @@ export class PostBusiness {
 
     }
 
-    public editPost = async (input: { data: CreatePostInput, id: string }): Promise<CreatePostOutput> => {
+    public editPost = async (input: EditPostInput): Promise<CreatePostOutput> => {
 
-        const postDB = await this.postDatabase.getPostsByIdToEdit(input.id)
+        const { token, content, idToEdit} = input
+
+        if (token === undefined) {
+            throw new BadRequestError("token está vazio")
+        }
+
+        const payload = this.tokenManager.getPayload(token)
+
+        if (payload === null) {
+            throw new BadRequestError("token invalido")
+        }
+
+        if (typeof content !== "string") {
+            throw new BadRequestError("'content' deve ser um string" )
+        }
+
+        if (content.length < 2) {
+            throw new BadRequestError("'content' deve possuir pelo menos 2 caracteres")
+        }
+
+        const postDB: PostDB | undefined = await this.postDatabase.findById(idToEdit)
+
 
         if (!postDB) {
             throw new NotFoundError("Post não encontrado")
         }
 
+        const creatorId = payload.id
+
+        if (postDB.creator_id !== creatorId) {
+            throw new BadRequestError("Somente quem criou o post pode edita-lo")
+        }
+
         const userDB = await this.userDataBase.getUsersById(postDB.creator_id)
         if (!userDB) {
             throw new NotFoundError("Erro ao procurar Id do criador do post")
-        }
-
-        const payload = this.tokenManager.getPayload(input.data.token)
-
-        if (payload === null) {
-            throw new BadRequestError("token não é valido")
         }
 
         const editedPost = new Post(
@@ -148,14 +166,12 @@ export class PostBusiness {
             userDB
         )
 
-        editedPost.setContent(input.data.content)
+        editedPost.setContent(content)
         editedPost.setUpdatedAt(new Date().toISOString())
-        const toEdit: PostEditDB = {
-            content: editedPost.getContent(),
-            updated_at: editedPost.getUpdatedAt()
-        }
+        
+        const updatedPost = editedPost.toDBModel()
 
-        await this.postDatabase.editPostbyId(editedPost.getId(), toEdit)
+        await this.postDatabase.updatePost(idToEdit, updatedPost)
 
         const output: CreatePostOutput = {
             message: "Post editado com sucesso",
@@ -164,6 +180,37 @@ export class PostBusiness {
     
         return output
 
+    }
+
+    public deletePost = async (input: DeletePostInput): Promise<void> => {
+        const { idToDelete, token} = input
+
+        if (token === undefined) {
+            throw new BadRequestError("token está vazio")
+        }
+
+        const payload = this.tokenManager.getPayload(token)
+
+        if(payload === null) {
+            throw new BadRequestError("token invalido")
+        }
+
+        const postDB = await this.postDatabase.findById(idToDelete)
+
+        if (!postDB) {
+            throw new NotFoundError("'id' não encontrado")
+        }
+
+        const creatorId = payload.id
+
+        if (
+            payload.role !== USER_ROLES.ADMIN
+            && postDB.creator_id !== creatorId
+            ) {
+            throw new BadRequestError("Somente quem criou o post pode apaga-lo")
+        }
+
+        await this.postDatabase.deletePost(idToDelete)
     }
         
 }
