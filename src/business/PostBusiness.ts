@@ -245,31 +245,52 @@ export class PostBusiness {
             like: likeBancoDados
         }
 
-        await this.postDatabase.likeDislikePost(likeDislike)
-
         const post = new Post (
-           postWithCreatorDB.id,
-           postWithCreatorDB.content,
-           postWithCreatorDB.likes,
-           postWithCreatorDB.dislikes,
-           postWithCreatorDB.created_at,
-           postWithCreatorDB.updated_at,
-           payload 
-        )
+            postWithCreatorDB.id,
+            postWithCreatorDB.content,
+            postWithCreatorDB.likes,
+            postWithCreatorDB.dislikes,
+            postWithCreatorDB.created_at,
+            postWithCreatorDB.updated_at,
+            payload 
+            )
 
-        if (like) {
-            post.addLike()
+        const posLikeDislikeExists = await this.postDatabase.findLikeDislike(likeDislike)
+
+        if (posLikeDislikeExists === "já deu like") {
+            if (like) {
+                await this.postDatabase.removeLikeDislike(likeDislike)
+                post.removeLike()
+            } else {
+                await this.postDatabase.updateLikeDislike(likeDislike)
+                post.removeLike()
+                post.addDislike()
+            }
+        
+        } else if (posLikeDislikeExists === "já deu dislike") {
+            if (like) {
+                await this.postDatabase.removeLikeDislike(likeDislike)
+                post.removeDislike()
+                post.addLike()
+            } else {
+                await this.postDatabase.updateLikeDislike(likeDislike)
+                post.removeDislike()
+            }
+
         } else {
-            post.addDislike()
+            await this.postDatabase.likeDislikePost(likeDislike)
+
+            if (like) {
+                post.addLike()
+            } else {
+                post.addDislike()
+            }
+            
         }
 
         const updatedPost = post.toDBModel()
 
         await this.postDatabase.updatePost(idToLikeDislike, updatedPost)
-        
-
-
-        
-    }
-        
+    
+    }        
 }

@@ -98,4 +98,40 @@ export class PostDatabase extends BaseDatabase {
         
         return result[0]
     }
+
+    public findLikeDislike = async (likeDislike: LikeDislikeDB): Promise<"já deu like" | "já deu dislike" | null> => {
+        const [ likeDislikeDB ]: LikeDislikeDB[] = await BaseDatabase
+            .connection(PostDatabase.TABLE_LIKE_DISLIKES)
+            .select()
+            .where({
+                user_id: likeDislike.user_id,
+                post_id:  likeDislike.post_id
+            })
+
+            if (likeDislikeDB) {
+                return likeDislikeDB.like === 1 ? "já deu like" : "já deu dislike"
+            } else {
+                return null
+            }
+    }
+
+    public removeLikeDislike = async (likeDislike: LikeDislikeDB): Promise<void> => {
+        await BaseDatabase
+        .connection(PostDatabase.TABLE_LIKE_DISLIKES)
+        .delete()
+        .where({
+            user_id: likeDislike.user_id,
+            post_id:  likeDislike.post_id
+        })
+    }
+
+    public updateLikeDislike = async (likeDislike: LikeDislikeDB) => {
+        await BaseDatabase
+        .connection(PostDatabase.TABLE_LIKE_DISLIKES)
+        .update(likeDislike)
+        .where({
+            user_id: likeDislike.user_id,
+            post_id:  likeDislike.post_id
+        })
+    }
 }
