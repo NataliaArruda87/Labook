@@ -3,6 +3,7 @@ import { GetUsersInput, GetUsersOutput, LoginInput, LoginOutput, SignupInput, Si
 import { BadRequestError } from "../errors/BadRequestError"
 import { NotFoundError } from "../errors/NotFoundError"
 import { User } from "../models/User"
+import { HashManager } from "../services/HashManager"
 import { IdGenerator } from "../services/IdGenerator"
 import { TokenManager, TokenPayload } from "../services/TokenManager"
 import { USER_ROLES } from "../types"
@@ -11,7 +12,8 @@ export class UserBusiness {
     constructor(
         private userDatabase: UserDatabase,
         private idGenerator: IdGenerator,
-        private tokenManager: TokenManager
+        private tokenManager: TokenManager,
+        private hashManager: HashManager
     ) {}
 
     public getUsers = async (input: GetUsersInput): Promise<GetUsersOutput> => {
@@ -58,11 +60,13 @@ export class UserBusiness {
 
         const id = this.idGenerator.generate()
 
+        const passwordHash = await this.hashManager.hash(password)
+
         const newUser = new User(
             id,
             name,
             email,
-            password,
+            passwordHash,
             USER_ROLES.NORMAL, 
             new Date().toISOString()
         )
@@ -100,6 +104,12 @@ export class UserBusiness {
 
         if (!userDB) {
             throw new NotFoundError("'email' não encontrado")
+        }
+
+        const passwordHash = this.hashManager.compare(password, userDB.password)
+
+        if (!passwordHash) {
+            throw new NotFoundError("'email' ou 'password' incorretos")
         }
 
         if (password !== userDB.password) {
