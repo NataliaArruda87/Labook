@@ -89,11 +89,11 @@ export class UserBusiness {
         const { email, password } = input
 
         if (typeof email !== "string") {
-            throw new Error("'email' deve ser string")
+            throw new BadRequestError("'email' deve ser string")
         }
 
         if (typeof password !== "string") {
-            throw new Error("'password' deve ser string")
+            throw new BadRequestError("'password' deve ser string")
         }
 
         const userDB = await this.userDatabase.findUserByEmail(email)

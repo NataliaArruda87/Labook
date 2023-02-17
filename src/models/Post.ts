@@ -67,7 +67,7 @@ export class Post {
         this.likes += 1
     }
 
-    public removeLikes() {
+    public removeLike() {
         this.likes -= 1
     }
 
@@ -83,7 +83,7 @@ export class Post {
         this.dislikes += 1
     }
 
-    public removeDislikes() {
+    public removeDislike() {
         this.dislikes -= 1
     }
 

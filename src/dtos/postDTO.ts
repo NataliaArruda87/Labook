@@ -1,4 +1,3 @@
-import { BadRequestError } from "../errors/BadRequestError";
 import { PostModel } from "../types";
 
 export interface GetPostInput {
